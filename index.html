@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensor Data</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <!--Links to google fonts-->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;
+    60osdispLay=swap" rel="styLesheet">
+
+    <!--Scripts for animations and API-->
+
+
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    
+
+</head>
+<body>
+    <!-- <div>
+    <h1>Hull Farm Dashboard</h1>
+    </div> -->
+    <div id="dashboard">
+        <!-- <div class="container" id="sidebar">
+            <div class="material-symbols-outlined" style="margin-bottom: 20px;">
+                home
+            </div>
+            <div class="material-symbols-outlined" style="margin-bottom: 30px;">
+                location_on
+            </div>
+            <div class="material-symbols-outlined" style="margin-bottom: 30px;">
+                calendar_month
+            </div>
+            <div class="material-symbols-outlined" style="margin-bottom: 30px;">
+                settings
+            </div>
+            <div class="material-symbols-outlined" style="margin-bottom: 400px;">
+                menu
+            </div>
+            <div class="material-symbols-outlined">
+                logout
+            </div>
+        </div> -->
+        <!-- <div class="container" id="weather">
+            
+        </div>
+        <div class="container" id="satellite-view">
+            <h2>Satellite Images</h2>
+            <div id="satellite-images"></div>
+        </div>
+        <div class="container" id="soil-graph">
+            <h2>Soil Information</h2>
+            <div id="chart-container">
+                <div id="chart"></div>
+                <div id="soil-info">
+                    
+                </div>
+            </div>
+        </div> -->
+
+        <div class="table-dash">
+       <table>
+        <tr>
+            <td >
+                 <div class="slider-container" id="air-temp-slider">
+                    <div class="slides-wrapper">
+                        <div class="air-temp" id="air-temp" >
+                            <table class="weather-wid">
+                              <tr>
+                                <td>
+                                <h2 class="weather">Weather</h2>
+                                </td>
+                                <td>
+                                 <p class="date" id="date">Today, 14 Feb 24</p>
+                                 </td>
+                           </tr>
+                            <tr>
+ <td rowspan="2">
+  <p class="desc" id="desc">Mostly Cloudy</p>
+    
+    <img class="icon-weather" id="weather-icon" alt="Weather icon" src="cloudy.png" />
+  </td>
+  <td>
+<p class="temp" id="temp">25°</p>
+ <p class="humidity" id="humidity">Humidity: 83%</p>
+  </td>
+  </tr>
+</table>
+
+
+                        </div>
+                        <div class="uv-index" id="uv-index">
+                           <div>
+                                <h2 class="uv">UV Index</h2>
+                            </div>
+                            <div class="uv-main">
+    <div class="uv-number" id="uv-number">1</div>
+    <div class="uv-level-text" id="uv-level">Low</div>
+  </div>
+
+  <div class="uv-gradient-bar">
+    <div class="uv-indicator" id="uv-indicator"></div>
+  </div>
+
+  <div class="uv-summary" id="uv-summary">Low for the rest of the day.</div>
+                        </div>
+                    </div>
+                     <div class="arrow-area"></div>
+                    <button class="arrow">&gt;</button>
+                
+            </td>
+
+            
+            <td rowspan="2">
+                <div class="satellite" id="satellite">
+                    <div>
+                        <h2 class="sat">Satellite</h2>
+                    </div>
+                </div>
+            </td>
+       </tr>
+       <tr>
+        <td colspan="2">
+                <div class="soil-graph" id="soil-graph">
+  <h2 class="soil">Soil Graph</h2>
+  <canvas id="soilChart"></canvas>
+  <div class="custom-legend">
+    <div><span class="legend-color" style="background-color: yellow;"></span> Temp at surface</div>
+    <div><span class="legend-color" style="background-color: blue;"></span> Temp at depth 10cm</div>
+    <div><span class="legend-color" style="background-color: green;"></span> Soil moisture</div>
+  </div>
+</div>
+            </td>
+            
+        </tr>
+        <table>
+        <tr>
+            <td colspan="2">
+                <div class="data-vis" id="data-vis">
+                    <div>
+                        <h2 class="dataviz">Data Viz</h2>
+                    </div>
+                </div>
+            </td>
+             <td>
+                <div class="pred" id="pred">
+                    <div>
+                        <h2 class="prediction">Prediction</h2>
+                    </div>
+                </div>
+            </td>
+
+           
+        </tr>
+</table>
+       
+</table>
+</div>
+       
+
+
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <script src="/js/getData.js"></script>
+    <script>
+
+
+ const sliderContainer = document.getElementById('air-temp-slider');
+  const slidesWrapper = sliderContainer.querySelector('.slides-wrapper');
+  const arrowArea = sliderContainer.querySelector('.arrow-area');
+  const arrow = sliderContainer.querySelector('.arrow');
+
+  arrowArea.addEventListener('mouseenter', () => {
+    // Slide left by width of air-temp (500px) to reveal uv-index
+    slidesWrapper.style.transform = 'translateX(-500px)';
+  });
+
+  arrowArea.addEventListener('mouseleave', () => {
+    slidesWrapper.style.transform = 'translateX(0)';
+  });
+
+  arrow.addEventListener('mouseenter', () => {
+    slidesWrapper.style.transform = 'translateX(-500px)';
+  });
+
+  arrow.addEventListener('mouseleave', () => {
+    slidesWrapper.style.transform = 'translateX(0)';
+  });
+
+
+// ----------------------------------------------------------------
+
+ const apiKey = 'f99b83239c7dbd770aacb3b8e5c37735';
+
+function fetchWeather(lat, lon) {
+  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
+
+  fetch(url)
+    .then(response => {
+      if (!response.ok) throw new Error(`Weather data not available (status: ${response.status})`);
+      return response.json();
+    })
+    .then(data => {
+      const temp = Math.round(data.main.temp);
+      const description = data.weather[0].description;
+      const icon = data.weather[0].icon;
+      const humidity = data.main.humidity;
+      const today = new Date().toLocaleDateString();
+
+      document.getElementById('temp').textContent = `${temp}°C`;
+      document.getElementById('desc').textContent = description;
+      document.getElementById('humidity').textContent = `Humidity: ${humidity}%`;
+      document.getElementById('weather-icon').src = `https://openweathermap.org/img/wn/${icon}@2x.png`;
+      document.getElementById('date').textContent = today;
+    })
+    .catch(error => {
+      console.error("Weather fetch error:", error);
+      document.getElementById('temp').textContent = "--°C";
+      document.getElementById('desc').textContent = "Weather unavailable";
+      document.getElementById('humidity').textContent = "Humidity: --%";
+    });
+}
+
+function initWeather() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        fetchWeather(position.coords.latitude, position.coords.longitude);
+      },
+      error => {
+        console.warn("Geolocation failed, using fallback:", error);
+        fetchWeather(51.4545, -2.5879); // Bristol fallback
+      }
+    );
+  } else {
+    console.warn("Geolocation not supported, using fallback.");
+    fetchWeather(51.4545, -2.5879); // Bristol fallback
+  }
+}
+
+window.onload = initWeather;
+
+
+// ------------------------------------------------------------
+
+
+
+  function fetchUVIndex(lat, lon) {
+  const url = `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,daily,alerts&appid=${apiKey}&units=metric`;
+
+  fetch(url)
+    .then(response => {
+      if (!response.ok) throw new Error(`UV data not available (status: ${response.status})`);
+      return response.json();
+    })
+    .then(data => {
+      const uv = data.current.uvi;
+      document.getElementById('uv-number').textContent = uv.toFixed(1);
+      
+      // Set UV level text
+      let level = 'Low', summary = 'Low for the rest of the day.', pos = 0;
+      if (uv >= 3 && uv < 6) {
+        level = 'Moderate';
+        summary = 'Take precautions if staying outside.';
+        pos = 25;
+      } else if (uv >= 6 && uv < 8) {
+        level = 'High';
+        summary = 'Protection against sun damage needed.';
+        pos = 50;
+      } else if (uv >= 8 && uv < 11) {
+        level = 'Very High';
+        summary = 'Avoid being outside during midday hours.';
+        pos = 75;
+      } else if (uv >= 11) {
+        level = 'Extreme';
+        summary = 'Try to stay indoors, wear full protection.';
+        pos = 95;
+      }
+
+      document.getElementById('uv-level').textContent = level;
+      document.getElementById('uv-summary').textContent = summary;
+      document.getElementById('uv-indicator').style.transform = `translateX(${pos}%)`;
+    })
+    .catch(error => {
+      console.error("UV fetch error:", error);
+      document.getElementById('uv-number').textContent = "--";
+      document.getElementById('uv-level').textContent = "Unavailable";
+      document.getElementById('uv-summary').textContent = "UV data could not be retrieved.";
+    });
+}
+// ----------------------------------------------------------------------
+ document.addEventListener('DOMContentLoaded', () => {
+        const soilCtx = document.getElementById('soilChart');
+        if (soilCtx) {
+            new Chart(soilCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [
+                        {
+                            label: 'Temp at surface',
+                            data: [5, 6, 7, 9, 12, 15, 18, 17, 14, 10, 7, 5],
+                            borderColor: 'yellow',
+                            backgroundColor: 'rgba(255, 255, 0, 0.1)',
+                            tension: 0.4,
+                            fill: false,
+                        },
+                        {
+                            label: 'Temp at depth 10cm',
+                            data: [4, 5, 6, 8, 11, 14, 16, 15, 13, 9, 6, 4],
+                            borderColor: 'blue',
+                            backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                            tension: 0.4,
+                            fill: false,
+                        },
+                        {
+                            label: 'Soil moisture',
+                            data: [60, 62, 65, 70, 75, 72, 68, 65, 70, 72, 68, 63],
+                            borderColor: 'green',
+                            backgroundColor: 'rgba(0, 128, 0, 0.1)',
+                            tension: 0.4,
+                            fill: false,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                color: '#f0f0f0'
+                            },
+                            grid: {
+                                color: 'rgba(240, 240, 240, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#f0f0f0'
+                            },
+                            grid: {
+                                color: 'rgba(240, 240, 240, 0.1)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+    });
+
+
+
+
+
+
+
+
+
+
+// -------------------------------------------------------------------------
+
+
+
+
+
+
+        // function fetchSatelliteImages() {
+        //     const url = "http://api.agromonitoring.com/agro/1.0/image/search?start=1715406980&end=1715406980&polyid=65c79f2293997d36adbfde4f&appid=a57be93e6b755d4f85fe6c922f3084ab";
+        //     fetch(url)
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             const images = data.map(img => `<img src="${img.url}" alt="Satellite Image">`);
+        //             document.getElementById('satellite-images').innerHTML = images.join('');
+        //         })
+        //         .catch(error => {
+        //             console.error('Error fetching satellite images:', error);
+        //             document.getElementById('satellite-images').innerHTML = '<p>Error loading images.</p>';
+        //         });
+        // }
+    
+        // function fetchSoilInfo() {
+        //     const url = "http://api.agromonitoring.com/agro/1.0/soil?polyid=65c79f2293997d36adbfde4f&appid=a57be93e6b755d4f85fe6c922f3084ab";
+        //     fetch(url)
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             let soilInfoHtml = '';
+        //             let colorMap = {
+        //                 t10: 'blue',
+        //                 moisture: 'green',
+        //                 t0: 'red'
+        //             };
+        //             for (const key in data) {
+        //                 if (key !== "dt") {
+        //                     soilInfoHtml += `<div><span style="width: 20px; height: 20px; background-color: ${colorMap[key]}; display: inline-block;"></span> ${key}: ${data[key]}</div>`;
+        //                 }
+        //             }
+        //             document.getElementById('soil-info').innerHTML = soilInfoHtml;
+        //             drawChart(data);
+        //         })
+        //         .catch(error => console.error('Error fetching soil info:', error));
+        // }
+    
+        // function drawChart(data) {
+        //     const container = document.getElementById('chart');
+        //     const svg = d3.select(container).append("svg")
+        //         .attr("viewBox", `0 0 ${container.offsetWidth} ${container.offsetHeight}`);
+    
+        //     const margin = {top: 20, right: 30, bottom: 30, left: 50},
+        //         width = container.clientWidth - margin.left - margin.right,
+        //         height = container.clientHeight - margin.top - margin.bottom;
+    
+        //     const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+    
+        //     const startDate = new Date(data.dt * 10);
+        //     const endDate = new Date(startDate.getTime() + 2 * 24 * 60 * 60 * 1000);
+    
+        //     const xScale = d3.scaleTime()
+        //         .domain([startDate, endDate])
+        //         .range([0, width]);
+    
+        //     const maxY = Math.max(data.t10, data.moisture, data.t0, 300);
+        //     const minY = 0;
+        //     const yScale = d3.scaleLinear()
+        //         .domain([minY, maxY])
+        //         .range([height, 0])
+        //         .nice();
+    
+        //     const yAxisValues = d3.range(minY, maxY + 60, 60);
+    
+        //     g.append("g")
+        //         .attr("transform", `translate(0,${height})`)
+        //         .call(d3.axisBottom(xScale));
+    
+        //     g.append("g")
+        //         .call(d3.axisLeft(yScale).tickValues(yAxisValues));
+    
+        //     const plotLine = (value, color) => {
+        //         g.append("line")
+        //             .attr("x1", xScale(startDate))
+        //             .attr("x2", xScale(endDate))
+        //             .attr("y1", yScale(value))
+        //             .attr("y2", yScale(value))
+        //             .attr("stroke", color)
+        //             .attr("stroke-width", 2);
+        //     };
+    
+        //     plotLine(data.t10, 'blue');
+        //     plotLine(data.moisture, 'green');
+        //     plotLine(data.t0, 'red');
+        // }
+    
+        // window.onload = function() {
+        //     fetchSatelliteImages();
+        //     fetchSoilInfo();
+        // };
+    </script>
+</body>
+</html>
+
