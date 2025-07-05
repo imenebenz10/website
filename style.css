@@ -33,12 +33,11 @@ table {
 }
 
 .air-temp {
-    /* margin-top: 30px;
-    margin-left: 20px; */
-    background-color: lightblue;
-    width: 500px;
-    height: 200px;
-    
+  background-color: lightblue;
+  width: 500px;
+  height: 200px;
+  padding: 10px;
+  box-sizing: border-box;
 }
 #air-temp{
     grid-column: 2 / 4;
@@ -64,17 +63,31 @@ table {
 .data-vis{
     /* margin-top: 210px;
     margin-left: 0px; */
-    background-color: #FF4500;
+    background-color: lightblue;
     width: 970px;
-    height: 250px;
+    height: 360px;
+}
+.dataviz-d{
+    width: 950px;
+    height: 280px;
+    border-radius: 30px;
+    background-color: white;
+    margin-left: 10px;
+    margin-top: 0px;
+
 }
 #data-vis{
     grid-column: 2 / 4;
     display: flex;
     flex-direction: column;
-    height: 200px;
+    height: 350px;
     border-radius: 10px;
 }
+canvas {
+      width: 100% !important;
+      height: 100% !important;
+      border-radius: 30px;
+    }
 /* .soil-graph{
    background-color: #FF4500;
     width: 500px;
@@ -107,7 +120,7 @@ table {
     grid-column: 2 / 4;
     display: flex;
     flex-direction: column;
-    height: 200px;
+    height: 350px;
     border-radius: 10px;
 }
 .slider-container {
@@ -261,10 +274,18 @@ table {
   font-weight: bold;
   margin-left: 30px;
 }
+.uv-d{
+    width: 460px;
+    height: 120px;
+    background-color: white;
+    margin-left: 20px;
+    border-radius: 30px;
+}
 
 .uv-level-text {
   font-size: 18px;
-  color: white;
+  color: black;
+  font-weight: bold;
 }
 
 .uv-gradient-bar {
@@ -287,7 +308,7 @@ table {
   top: -5px;
   width: 18px;
   height: 18px;
-  background-color: white;
+  background-color: black;
   
   border-radius: 50%;
   transform: translateX(0%);
@@ -298,7 +319,7 @@ table {
   margin-top: 20px;
   margin-left: 40px;
   font-size: 20px;
-  color: white;
+  color: black;
 }
 
 /* .weather-wid {
@@ -316,9 +337,11 @@ table {
   box-sizing: border-box;
   overflow: hidden;
 } */
- .weather-wid{
-  margin-top: 0px;
- }
+ .weather-wid {
+  margin-top: 0;
+  width: 100%;
+  border-spacing: 10px;
+}
 
 .weather {
  height: 30px;
@@ -330,44 +353,76 @@ table {
     color: white;
 }
 
-.date{
-  margin-top: 10px;
-  font-size: 16px;
-  margin-left: 20px;
+.date {
+  font-size: 18px;
+  margin: 0;
+  padding: 5px 0;
+  text-align: center;
+}
+
+.date-d {
+  width: 200px;
+  height: 40px;
+  background-color: white;
+  border-radius: 30px;
+  margin-left: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .desc {
   font-size: 16px;
   font-weight: bold;
-  margin-top: 0px;
-  margin-left: 20px;
+  margin: 0;
+  text-align: center;
+}
+
+.desc-d {
+  width: 200px;
+  height: 110px;
+  border-radius: 30px;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .temp {
   font-size: 22px;
   font-weight: bold;
-  margin-top: 0px;
-  margin-bottom: 70px;
-  margin-left: 20px;
+  margin: 0;
+  text-align: center;
+}
+
+.temp-d {
+  width: 200px;
+  height: 110px;
+  border-radius: 30px;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .icon-weather {
-  width: 90px;
-  height: 90px;
-  display: block;
-  
-  margin-top: 0px;
-  margin-left: 20px;
+  width: 60px;
+  height: 60px;
+  margin-top: 5px;
 }
-.humidity{
+
+.humidity {
   font-size: 16px;
-  margin-top: 0px;
-  
+  margin: 5px 0 0 0;
+  text-align: center;
 }
-.soil-graph {
-    background-color: lightblue; /* Light blue */
+
+/* .soil-graph {
+    background-color: lightblue; 
     width: 500px;
-    height: 350px; /* Increased to fit graph + legend */
+    height: 350px; 
     grid-column: 2 / 4;
     display: flex;
     flex-direction: column;
@@ -389,9 +444,9 @@ table {
 canvas#soilChart {
     flex-grow: 1;
     max-height: 250px;
-}
+} */
 
-.custom-legend {
+/* .custom-legend {
     display: flex;
     justify-content: space-around;
     margin-top: 5px;
@@ -406,8 +461,197 @@ canvas#soilChart {
     height: 12px;
     border-radius: 3px;
     margin-right: 5px;
+} */
+
+.soil-graph {
+    background-color: lightblue;
+    width: 500px;
+    height: 280px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+    justify-content: space-between;
 }
 
+.soil {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    margin: 0 0 8px 10px;
+}
+
+.soil-table{
+    margin-top: 0px;
+}
+
+.soil-temp{
+    margin-top: 0px;
+    background-color: white;
+    width: 200px;
+    height: 90px;
+    border-radius: 30px;
+}
+
+.soil-mois{
+    background-color: white;
+    width: 200px;
+    height: 90px;
+    border-radius: 30px;
+}
+
+.soil-temp10{
+    background-color: white;
+    width: 200px;
+    height: 90px;
+    border-radius: 30px;
+}
+
+.soil-ph{
+    background-color: white;
+    width: 200px;
+    height: 90px;
+    border-radius: 30px;
+}
+.row {
+  display: flex;
+  align-items: flex-start; /* align icon to top */
+}
+
+.icon {
+  font-size: 34px;
+  margin-top: 30px;
+  margin-left: 30px;
+}
+
+.text {
+  margin-left: 20px;
+  padding-top: 30px; /* slightly lower the text */
+}
+
+.value {
+  font-size: 20px;
+  font-weight: bold;
+  margin-left: 10px;
+
+}
+
+.label {
+  font-size: 11px;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.row-m {
+  display: flex;
+  align-items: flex-start;
+}
+
+.icon-m {
+  font-size: 28px;
+  margin-top: 30px;
+  margin-left: 30px;
+}
+
+.text-m {
+  margin-left: 20px;
+  padding-top: 30px;
+}
+
+.value-m {
+  font-size: 20px;
+  font-weight: bold;
+  margin-left: 20px;
+}
+
+.label-m {
+  font-size: 11px;
+  margin-top: 10px;
+  margin-left: 20px;
+}
+
+.row-10 {
+  display: flex;
+  align-items: flex-start;
+}
+
+.icon-10 {
+  font-size: 34px;
+  margin-top: 30px;
+  margin-left: 30px;
+}
+
+.text-10 {
+ margin-left: 20px;
+  padding-top: 20px;
+}
+
+.value-10 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-left: 10px;
+}
+
+.label-10 {
+  font-size: 11px;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.row-ph {
+  display: flex;
+  align-items: flex-start;
+}
+
+.icon-ph {
+  font-size: 28px;
+  margin-top: 30px;
+  margin-left: 30px;
+}
+
+.text-ph {
+  margin-left: 20px;
+  padding-top: 30px;
+}
+
+.value-ph {
+  font-size: 20px;
+  font-weight: bold;
+  margin-left: 20px;
+}
+
+.label-ph {
+  font-size: 11px;
+  margin-top: 10px;
+  margin-left: 20px;
+}
+
+
+
+/* canvas#soilChart {
+    flex-grow: 1;
+    max-height: 260px;
+    width: 100%;
+}
+
+.custom-legend {
+    display: flex;
+    justify-content: space-around;
+    font-weight: bold;
+    font-family: sans-serif;
+    font-size: 13px;
+    margin-top: 10px;
+}
+
+.legend-color {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    margin-right: 5px;
+} */
 
 
 

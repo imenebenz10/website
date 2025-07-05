@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;
     60osdispLay=swap" rel="styLesheet">
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <!--Scripts for animations and API-->
 
 
@@ -75,18 +76,24 @@
                                 <h2 class="weather">Weather</h2>
                                 </td>
                                 <td>
+                                  <div class="date-d">
                                  <p class="date" id="date">Today, 14 Feb 24</p>
+                                 </div>
                                  </td>
                            </tr>
                             <tr>
  <td rowspan="2">
+  <div class="desc-d">
   <p class="desc" id="desc">Mostly Cloudy</p>
     
     <img class="icon-weather" id="weather-icon" alt="Weather icon" src="cloudy.png" />
+    </div>
   </td>
   <td>
+    <div class="temp-d">
 <p class="temp" id="temp">25°</p>
  <p class="humidity" id="humidity">Humidity: 83%</p>
+ </div>
   </td>
   </tr>
 </table>
@@ -97,6 +104,7 @@
                            <div>
                                 <h2 class="uv">UV Index</h2>
                             </div>
+                            <div class="uv-d">
                             <div class="uv-main">
     <div class="uv-number" id="uv-number">1</div>
     <div class="uv-level-text" id="uv-level">Low</div>
@@ -107,8 +115,10 @@
   </div>
 
   <div class="uv-summary" id="uv-summary">Low for the rest of the day.</div>
+  </div>
                         </div>
                     </div>
+
                      <div class="arrow-area"></div>
                     <button class="arrow">&gt;</button>
                 
@@ -127,11 +137,83 @@
         <td colspan="2">
                 <div class="soil-graph" id="soil-graph">
   <h2 class="soil">Soil Graph</h2>
-  <canvas id="soilChart"></canvas>
+  <table class="soil-table">
+    <tr>
+      <td>
+  <div class="soil-temp">
+     <div class="row">
+    <div class="icon-wrapper">
+      <i class="fas fa-thermometer-half icon"></i>
+    </div>
+    <div class="text">
+      <div class="value" id="soil-temp">-- °C</div>
+      <div class="label">Soil Temperature (°C)</div>
+    </div>
+  </div>
+  </div>
+  </td>
+  <td>
+  <div class="soil-mois">
+    <div class="row-m">
+    <div class="icon-wrapper">
+      <i class="fas fa-tint icon-m"></i> <!-- Water droplet icon for moisture -->
+    </div>
+    <div class="text-m">
+      <div class="value-m" id="soil-moisture">--%</div>
+      <div class="label-m">Soil Moisture</div>
+    </div>
+  </div>
+  </div>
+  </td>
+  </tr>
+  <tr>
+    <td>
+  <div class="soil-temp10">
+    <div class="row-10">
+    <div class="icon-wrapper">
+      <i class="fas fa-thermometer-half icon-10"></i>
+    </div>
+    <div class="text-10">
+      <div class="value-10" id="soil-temp10">-- °C</div>
+      <div class="label-10">Soil Temperature at 10cm (°C)</div>
+    </div>
+  </div>
+  </div>
+    </td>
+    <td>
+  <div class="soil-ph">
+    <div class="row-ph">
+    <div class="icon-wrapper">
+      <i class="fas fa-vial icon-ph"></i> <!-- Flask icon for pH -->
+    </div>
+    <div class="text-ph">
+      <div class="value-ph" id="soil-ph">--</div>
+      <div class="label-ph">Soil pH</div>
+    </div>
+  </div>
+  </div>
+  </td>
+  </tr>
+  <tr>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td></td>
+  </tr>
+  
+  
+  </table>
+  <!-- <canvas id="soilChart"></canvas>
   <div class="custom-legend">
     <div><span class="legend-color" style="background-color: yellow;"></span> Temp at surface</div>
     <div><span class="legend-color" style="background-color: blue;"></span> Temp at depth 10cm</div>
-    <div><span class="legend-color" style="background-color: green;"></span> Soil moisture</div>
+    <div><span class="legend-color" style="background-color: green;"></span> Soil moisture</div> -->
   </div>
 </div>
             </td>
@@ -142,7 +224,10 @@
             <td colspan="2">
                 <div class="data-vis" id="data-vis">
                     <div>
-                        <h2 class="dataviz">Data Viz</h2>
+                        <h2 class="dataviz">Data Visualisation</h2>
+                        <div class="dataviz-d">
+                              <canvas id="ndviChart"></canvas>
+                        </div>
                     </div>
                 </div>
             </td>
@@ -165,10 +250,13 @@
 
 
     </div>
+    
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+   
 
-    <script src="/js/getData.js"></script>
+    <script src="getData222.js"></script>
     <script>
 
 
@@ -295,72 +383,182 @@ window.onload = initWeather;
       document.getElementById('uv-summary').textContent = "UV data could not be retrieved.";
     });
 }
-// ----------------------------------------------------------------------
- document.addEventListener('DOMContentLoaded', () => {
-        const soilCtx = document.getElementById('soilChart');
-        if (soilCtx) {
-            new Chart(soilCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                    datasets: [
-                        {
-                            label: 'Temp at surface',
-                            data: [5, 6, 7, 9, 12, 15, 18, 17, 14, 10, 7, 5],
-                            borderColor: 'yellow',
-                            backgroundColor: 'rgba(255, 255, 0, 0.1)',
-                            tension: 0.4,
-                            fill: false,
-                        },
-                        {
-                            label: 'Temp at depth 10cm',
-                            data: [4, 5, 6, 8, 11, 14, 16, 15, 13, 9, 6, 4],
-                            borderColor: 'blue',
-                            backgroundColor: 'rgba(0, 0, 255, 0.1)',
-                            tension: 0.4,
-                            fill: false,
-                        },
-                        {
-                            label: 'Soil moisture',
-                            data: [60, 62, 65, 70, 75, 72, 68, 65, 70, 72, 68, 63],
-                            borderColor: 'green',
-                            backgroundColor: 'rgba(0, 128, 0, 0.1)',
-                            tension: 0.4,
-                            fill: false,
-                        }
-                    ]
+//----------------------------------------------------------------------------------------
+function parseAndAggregate(csvText) {
+      const lines = csvText.trim().split('\n');
+      const dataByDate = {};
+      
+      for(let i = 1; i < lines.length; i++) {
+        const [date, ndviStr] = lines[i].split(',');
+        const ndvi = parseFloat(ndviStr);
+        if(!dataByDate[date]) dataByDate[date] = [];
+        dataByDate[date].push(ndvi);
+      }
+      
+      // Calculate average NDVI per date
+      const labels = [];
+      const avgData = [];
+      
+      Object.keys(dataByDate).sort().forEach(date => {
+        const vals = dataByDate[date];
+        const avg = vals.reduce((a,b) => a+b, 0) / vals.length;
+        labels.push(date);
+        avgData.push(avg);
+      });
+      
+      return { labels, avgData };
+    }
+
+    async function loadAndDrawChart() {
+      try {
+        const response = await fetch('ndvi_time_series.csv');
+        if (!response.ok) throw new Error('Failed to load CSV file.');
+        const csvText = await response.text();
+        
+        const { labels, avgData } = parseAndAggregate(csvText);
+
+        const ctx = document.getElementById('ndviChart').getContext('2d');
+
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Average NDVI',
+              data: avgData,
+              borderColor: 'green',
+              backgroundColor: 'rgba(0,128,0,0.1)',
+              fill: true,
+              tension: 0.3,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              borderWidth: 2,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                type: 'time',
+                time: {
+                  parser: 'yyyy-MM-dd',
+                  unit: 'month',
+                  displayFormats: {
+                    month: 'MMM yyyy'
+                  }
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            ticks: {
-                                color: '#f0f0f0'
-                            },
-                            grid: {
-                                color: 'rgba(240, 240, 240, 0.1)'
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                color: '#f0f0f0'
-                            },
-                            grid: {
-                                color: 'rgba(240, 240, 240, 0.1)'
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
+                title: {
+                  display: true,
+                  text: 'Date'
+                },
+                grid: {
+                  display: true,
+                  color: '#ccc'
                 }
-            });
-        }
-    });
+              },
+              y: {
+                title: {
+                  display: true,
+                  text: 'NDVI'
+                },
+                min: 0,
+                max: 1,
+                grid: {
+                  display: true,
+                  color: '#ccc'
+                }
+              }
+            },
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top'
+              },
+              tooltip: {
+                enabled: true,
+                mode: 'nearest',
+                intersect: false,
+              }
+            }
+          }
+        });
+      } catch (err) {
+        console.error('Error loading or parsing CSV:', err);
+        alert('Failed to load NDVI data. Make sure ndvi_time_series.csv is in the right place.');
+      }
+    }
+
+    loadAndDrawChart();
+
+
+
+// ----------------------------------------------------------------------
+//  document.addEventListener('DOMContentLoaded', () => {
+//         const soilCtx = document.getElementById('soilChart');
+//         if (soilCtx) {
+//             new Chart(soilCtx, {
+//                 type: 'line',
+//                 data: {
+//                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+//                     datasets: [
+//                         {
+//                             label: 'Temp at surface',
+//                             data: [5, 6, 7, 9, 12, 15, 18, 17, 14, 10, 7, 5],
+//                             borderColor: 'yellow',
+//                             backgroundColor: 'rgba(255, 255, 0, 0.1)',
+//                             tension: 0.4,
+//                             fill: false,
+//                         },
+//                         {
+//                             label: 'Temp at depth 10cm',
+//                             data: [4, 5, 6, 8, 11, 14, 16, 15, 13, 9, 6, 4],
+//                             borderColor: 'blue',
+//                             backgroundColor: 'rgba(0, 0, 255, 0.1)',
+//                             tension: 0.4,
+//                             fill: false,
+//                         },
+//                         {
+//                             label: 'Soil moisture',
+//                             data: [60, 62, 65, 70, 75, 72, 68, 65, 70, 72, 68, 63],
+//                             borderColor: 'green',
+//                             backgroundColor: 'rgba(0, 128, 0, 0.1)',
+//                             tension: 0.4,
+//                             fill: false,
+//                         }
+//                     ]
+//                 },
+//                 options: {
+//                     responsive: true,
+//                     maintainAspectRatio: false,
+//                     scales: {
+//                         y: {
+//                             beginAtZero: false,
+//                             ticks: {
+//                                 color: '#f0f0f0'
+//                             },
+//                             grid: {
+//                                 color: 'rgba(240, 240, 240, 0.1)'
+//                             }
+//                         },
+//                         x: {
+//                             ticks: {
+//                                 color: '#f0f0f0'
+//                             },
+//                             grid: {
+//                                 color: 'rgba(240, 240, 240, 0.1)'
+//                             }
+//                         }
+//                     },
+//                     plugins: {
+//                         legend: {
+//                             display: false
+//                         }
+//                     }
+//                 }
+//             });
+//         }
+//     });
 
 
 
