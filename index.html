@@ -251,7 +251,7 @@
 
     </div>
     
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
    
@@ -384,37 +384,40 @@ window.onload = initWeather;
     });
 }
 //----------------------------------------------------------------------------------------
-function parseAndAggregate(csvText) {
+const CSV_URL = 'https://imenebenz10.github.io/website/ndvi_time_series.csv';
+
+
+    // Parse CSV and average NDVI by date
+    function parseAndAggregate(csvText) {
       const lines = csvText.trim().split('\n');
       const dataByDate = {};
-      
-      for(let i = 1; i < lines.length; i++) {
+
+      for (let i = 1; i < lines.length; i++) {
         const [date, ndviStr] = lines[i].split(',');
         const ndvi = parseFloat(ndviStr);
-        if(!dataByDate[date]) dataByDate[date] = [];
+        if (!dataByDate[date]) dataByDate[date] = [];
         dataByDate[date].push(ndvi);
       }
-      
-      // Calculate average NDVI per date
+
       const labels = [];
       const avgData = [];
-      
+
       Object.keys(dataByDate).sort().forEach(date => {
         const vals = dataByDate[date];
-        const avg = vals.reduce((a,b) => a+b, 0) / vals.length;
+        const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
         labels.push(date);
         avgData.push(avg);
       });
-      
+
       return { labels, avgData };
     }
 
     async function loadAndDrawChart() {
       try {
-        const response = await fetch('ndvi_time_series.csv');
+        const response = await fetch(CSV_URL);
         if (!response.ok) throw new Error('Failed to load CSV file.');
         const csvText = await response.text();
-        
+
         const { labels, avgData } = parseAndAggregate(csvText);
 
         const ctx = document.getElementById('ndviChart').getContext('2d');
@@ -427,7 +430,7 @@ function parseAndAggregate(csvText) {
               label: 'Average NDVI',
               data: avgData,
               borderColor: 'green',
-              backgroundColor: 'rgba(0,128,0,0.1)',
+              backgroundColor: 'rgba(0, 128, 0, 0.1)',
               fill: true,
               tension: 0.3,
               pointRadius: 4,
@@ -485,7 +488,7 @@ function parseAndAggregate(csvText) {
         });
       } catch (err) {
         console.error('Error loading or parsing CSV:', err);
-        alert('Failed to load NDVI data. Make sure ndvi_time_series.csv is in the right place.');
+        alert('Failed to load NDVI data. Make sure the CSV file is accessible at: ' + CSV_URL);
       }
     }
 
