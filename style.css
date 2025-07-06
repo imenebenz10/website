@@ -60,34 +60,86 @@ table {
     height: 200px;
     border-radius: 10px;
 }
-.data-vis{
-    /* margin-top: 210px;
-    margin-left: 0px; */
-    background-color: lightblue;
-    width: 970px;
-    height: 360px;
+.data-vis {
+  background-color: lightblue;
+  width: 1070px;
+  height: 560px;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
 }
-.dataviz-d{
-    width: 950px;
-    height: 280px;
-    border-radius: 30px;
-    background-color: white;
-    margin-left: 10px;
-    margin-top: 0px;
 
+.dataviz {
+  padding-left: 20px;
 }
-#data-vis{
-    grid-column: 2 / 4;
-    display: flex;
-    flex-direction: column;
-    height: 350px;
-    border-radius: 10px;
+
+.slider-container2 {
+  position: relative;
+  overflow: hidden;
+  height: 480px;
 }
+
+.slider-wrapper2 {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+  width: 2100px; /* two slides of 1050px */
+}
+
+.dataviz-d {
+  width: 1050px;
+  height: 480px;
+  border-radius: 30px;
+  background-color: white;
+  margin-left: 10px;
+  margin-top: 0px;
+  flex-shrink: 0;
+  position: relative;
+}
+
 canvas {
-      width: 100% !important;
-      height: 100% !important;
-      border-radius: 30px;
-    }
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 30px;
+}
+
+.arrow-right {
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  font-size: 20px;
+  color: black;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 5px 10px;
+  border-radius: 50px;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity 0.3s;
+}
+.arrow-left {
+  position: absolute;
+  top: 50%;
+  left: 5px;
+  font-size: 20px;
+  color: black;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 5px 10px;
+  border-radius: 50px;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity 0.3s;
+}
+
+.slider-container2:hover .arrow-left {
+  opacity: 1;
+  
+}
+
+.slider-container2:hover .arrow-right {
+  opacity: 1;
+}
+
 /* .soil-graph{
    background-color: #FF4500;
     width: 500px;
@@ -204,10 +256,10 @@ canvas {
 } */
 .dataviz{
     height: 30px;
-    margin-left: 20px;
-    margin-top: 10px;
+    margin-left: 10px;
+    margin-top: 20px;
     font-family: 'Times New Roman', Times, serif;
-    font-size: 20;
+    font-size: 24;
     font-weight: bold;
     color: white;
 }
@@ -480,7 +532,10 @@ canvas#soilChart {
     font-size: 24px;
     font-weight: bold;
     color: white;
-    margin: 0 0 8px 10px;
+    margin-left: 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    
 }
 
 .soil-table{
