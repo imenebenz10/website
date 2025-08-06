@@ -1,0 +1,20 @@
+
+Nitrogen Estimation Report (Empirical Regression Model)
+=====================================================
+Analysis Date: 2025-07-15
+Time Period Covered: 2017-05-22 to 2025-06-19
+
+Model Parameters:
+- NDVI Weight: 0.5
+- NDRE Weight: 0.7
+- Intercept: 0.2
+- Maximum Nitrogen Value: 3.0
+
+Results Summary:
+- Mean Estimated Nitrogen: 0.55
+- Maximum Nitrogen: 1.21 on 2018-05-22
+- Minimum Nitrogen: 0.24 on 2022-01-21
+
+Data Quality Indicators:
+- NDVI-NDRE Correlation: 0.97
+- Average NDRE/NDVI Ratio: 0.60

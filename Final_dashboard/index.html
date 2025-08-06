@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farm Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
+</head>
+<body>
+    <div id="dashboard">
+
+        <!-- TOP ROW: Weather + Satellite -->
+        <div class="top-row">
+            <div class="slider-container" id="air-temp-slider">
+                <div class="slides-wrapper">
+                    <div class="air-temp" id="air-temp">
+                        <h2 class="weather">Weather</h2>
+                        <p class="date" id="date">Loading...</p> 
+                        <div class="weather-boxes">
+                            <div class="desc-d">
+                                <p class="desc" id="desc">Loading...</p>
+                                <img class="icon-weather" id="weather-icon" alt="Weather icon" src="cloudy.png" />
+                            </div>
+                            <div class="temp-d">
+                                <p class="temp" id="temp">--°</p>
+                                <p class="humidity" id="humidity">Humidity: --%</p>
+                            </div>
+                        </div>    
+                    </div>
+                    
+                    <!--<div class="uv-index" id="uv-index">
+                        <h2 class="uv">UV Index</h2>
+                        <div class="uv-d">
+                            <div class="uv-main">
+                                <div class="uv-number" id="uv-number">--</div>
+                                <div class="uv-level-text" id="uv-level">Loading</div>
+                            </div>
+                            <div class="uv-gradient-bar">
+                                <div class="uv-indicator" id="uv-indicator"></div>
+                            </div>
+                            <div class="uv-summary" id="uv-summary">Loading UV data...</div>
+                        </div>
+                    </div>-->
+                </div>
+                <div class="arrow-area"></div>
+                <button class="arrow">&gt;</button>
+            </div>
+
+            <div class="soil-graph" id="soil-graph">
+                <h2 class="soil">Soil</h2>
+                <div class="soil-table">
+                    <div class="soil-temp">
+                        <i class="fas fa-thermometer-half icon"></i>
+                        <div class="text">
+                            <div class="value" id="soil-temp">-- °C</div>
+                            <div class="label">Soil Temperature (°C)</div>
+                        </div>
+                    </div>
+
+                    <div class="soil-mois">
+                        <i class="fas fa-tint icon-m"></i>
+                        <div class="text-m">
+                            <div class="value-m" id="soil-moisture">--%</div>
+                            <div class="label-m">Soil Moisture</div>
+                        </div>
+                    </div>
+
+                    <div class="soil-temp10">
+                        <i class="fas fa-thermometer-half icon-10"></i>
+                        <div class="text-10">
+                            <div class="value-10" id="soil-temp10">-- °C</div>
+                            <div class="label-10">Soil Temperature at 10cm (°C)</div>
+                        </div>
+                    </div>
+
+                    <div class="soil-ph">
+                        <i class="fas fa-vial icon-ph"></i>
+                        <div class="text-ph">
+                            <div class="value-ph" id="soil-ph">--</div>
+                            <div class="label-ph">Soil pH</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="satellite" id="satellite">
+                <h2 class="sat">Satellite</h2>
+                <div id="satellite-loading" style="text-align: center; padding: 50px;">
+                    <p>Loading satellite data...</p>
+                </div>
+                <div class="satellite-frame-wrapper">
+                <iframe id="satellite-map"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM ROW: Data Viz + Prediction -->
+        <div class="bottom-row">
+            <div class="data-vis" id="data-vis">
+                <h2 class="dataviz">Data Visualisation</h2>
+                <div class="slider-container2">
+                    <div class="slider-wrapper2">
+                        <div class="dataviz-d">
+                            <div id="ndviChartLoading" class="chart-loading">
+                                <div class="loading-spinner"></div>
+                                <p>Loading NDVI/NDRE data...</p>
+                            </div>
+                            <canvas id="ndviChart"></canvas>
+                        </div>
+
+                        <div class="dataviz-d">
+                            <div id="nitrogenChartLoading" class="chart-loading">
+                                <div class="loading-spinner"></div>
+                                <p>Loading Nitrogen data...</p>
+                            </div>
+                            <canvas id="nitrogenChart"></canvas>
+                            <button id="downloadNitrogenReport" class="download-btn">
+                                <i class="fas fa-download"></i> Download Nitrogen Report
+                            </button>
+                        </div>
+                    </div>
+                    <div class="arrow-left" onclick="slideLeft()">&#9664;</div>
+                    <div class="arrow-right" onclick="slideRight()">&#9654;</div>
+                </div>
+            </div>
+
+            <div class="pred" id="pred">
+                <h2 class="prediction">Prediction</h2>
+                <div id="prediction-content" style="padding: 10px;">
+                    <div id="prediction-loading" style="text-align: center; padding: 50px;">
+                        <div class="loading-spinner"></div>
+                        <p>Loading prediction data...</p>
+                    </div>
+                    <div id="prediction-results" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentSlide = 0;
+        const totalSlides = 2;
+
+        const sliderContainer = document.getElementById('air-temp-slider');
+        const slidesWrapper = sliderContainer.querySelector('.slides-wrapper');
+        const arrowArea = sliderContainer.querySelector('.arrow-area');
+        const arrow = sliderContainer.querySelector('.arrow');
+        const apiKey = 'f99b83239c7dbd770aacb3b8e5c37735';
+        let ndviChartInstance = null;
+        let nitrogenChartInstance = null;
+
+        // Initialize slider functionality
+        arrowArea.addEventListener('mouseenter', () => {
+            slidesWrapper.style.transform = 'translateX(-500px)';
+        });
+
+        arrowArea.addEventListener('mouseleave', () => {
+            slidesWrapper.style.transform = 'translateX(0)';
+        });
+
+        arrow.addEventListener('mouseenter', () => {
+            slidesWrapper.style.transform = 'translateX(-500px)';
+        });
+
+        arrow.addEventListener('mouseleave', () => {
+            slidesWrapper.style.transform = 'translateX(0)';
+        });
+
+        // Data visualization slider
+        function slideRight() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                document.querySelector('.slider-wrapper2').style.transform = `translateX(-${currentSlide * 50}%)`;
+            }
+        }
+
+        function slideLeft() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                document.querySelector('.slider-wrapper2').style.transform = `translateX(-${currentSlide * 50}%)`;
+            }
+        }
+
+
+        document.getElementById('downloadNitrogenReport').addEventListener('click', function() {
+            // Create a temporary link element
+            const link = document.createElement('a');
+            link.href = 'http://localhost:5001/api/nitrogen/report';
+            link.download = 'nitrogen_report.txt';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Also download the image
+            const imgLink = document.createElement('a');
+            imgLink.href = 'http://localhost:5001/api/nitrogen/analysis?' + new Date().getTime();
+            imgLink.download = 'nitrogen_analysis.png';
+            document.body.appendChild(imgLink);
+            imgLink.click();
+            document.body.removeChild(imgLink);
+        });
+
+        // Weather functions
+        function fetchWeather(lat, lon) {
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error(`Weather data not available (status: ${response.status})`);
+                    return response.json();
+                })
+                .then(data => {
+                    const temp = Math.round(data.main.temp);
+                    const description = data.weather[0].description;
+                    const icon = data.weather[0].icon;
+                    const humidity = data.main.humidity;
+                    const today = new Date().toLocaleDateString();
+
+                    document.getElementById('temp').textContent = `${temp}°C`;
+                    document.getElementById('desc').textContent = description;
+                    document.getElementById('humidity').textContent = `Humidity: ${humidity}%`;
+                    document.getElementById('weather-icon').src = `https://openweathermap.org/img/wn/${icon}@2x.png`;
+                    document.getElementById('date').textContent = today;
+                })
+                .catch(error => {
+                    console.error("Weather fetch error:", error);
+                    document.getElementById('temp').textContent = "--°C";
+                    document.getElementById('desc').textContent = "Weather unavailable";
+                    document.getElementById('humidity').textContent = "Humidity: --%";
+                });
+        }
+
+        function initWeather() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        fetchWeather(position.coords.latitude, position.coords.longitude);
+                        fetchUVIndex(position.coords.latitude, position.coords.longitude);
+                    },
+                    error => {
+                        console.warn("Geolocation failed, using fallback:", error);
+                        fetchWeather(51.4545, -2.5879); // Bristol fallback
+                        fetchUVIndex(51.4545, -2.5879);
+                    }
+                );
+            } else {
+                console.warn("Geolocation not supported, using fallback.");
+                fetchWeather(51.4545, -2.5879); // Bristol fallback
+                fetchUVIndex(51.4545, -2.5879);
+            }
+        }
+
+        function fetchUVIndex(lat, lon) {
+            const url = `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,daily,alerts&appid=${apiKey}&units=metric`;
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error(`UV data not available (status: ${response.status})`);
+                    return response.json();
+                })
+                .then(data => {
+                    const uv = data.current.uvi;
+                    document.getElementById('uv-number').textContent = uv.toFixed(1);
+                    
+                    let level = 'Low', summary = 'Low for the rest of the day.', pos = 0;
+                    if (uv >= 3 && uv < 6) {
+                        level = 'Moderate';
+                        summary = 'Take precautions if staying outside.';
+                        pos = 25;
+                    } else if (uv >= 6 && uv < 8) {
+                        level = 'High';
+                        summary = 'Protection against sun damage needed.';
+                        pos = 50;
+                    } else if (uv >= 8 && uv < 11) {
+                        level = 'Very High';
+                        summary = 'Avoid being outside during midday hours.';
+                        pos = 75;
+                    } else if (uv >= 11) {
+                        level = 'Extreme';
+                        summary = 'Try to stay indoors, wear full protection.';
+                        pos = 95;
+                    }
+
+                    document.getElementById('uv-level').textContent = level;
+                    document.getElementById('uv-summary').textContent = summary;
+                    document.getElementById('uv-indicator').style.transform = `translateX(${pos}%)`;
+                })
+                .catch(error => {
+                    console.error("UV fetch error:", error);
+                    document.getElementById('uv-number').textContent = "--";
+                    document.getElementById('uv-level').textContent = "Unavailable";
+                    document.getElementById('uv-summary').textContent = "UV data could not be retrieved.";
+                });
+        }
+
+        async function fetchAndDrawChart() {
+            try {
+                // Show loading states (only for elements that exist)
+                document.getElementById('ndviChartLoading').style.display = 'block';
+                document.getElementById('nitrogenChartLoading').style.display = 'block';
+                document.getElementById('prediction-loading').style.display = 'block';
+                document.getElementById('satellite-loading').style.display = 'block';
+
+                // Hide content areas
+                document.getElementById('ndviChart').style.display = 'none';
+                document.getElementById('nitrogenChart').style.display = 'none';
+                document.getElementById('satellite-map').style.display = 'none';
+
+                // Fetch all data in parallel
+                const [ndviResponse, ndreResponse, nitrogenResponse] = await Promise.all([
+                    fetch('http://localhost:5001/api/ndvi'),
+                    fetch('http://localhost:5001/api/ndre'),
+                    fetch('http://localhost:5001/api/nitrogen')
+                ]);
+
+                // Check if any response failed
+                if (!ndviResponse.ok) throw new Error(`NDVI Error: ${ndviResponse.status}`);
+                if (!ndreResponse.ok) throw new Error(`NDRE Error: ${ndreResponse.status}`);
+                if (!nitrogenResponse.ok) throw new Error(`Nitrogen Error: ${nitrogenResponse.status}`);
+
+                // Parse responses
+                const ndviData = await ndviResponse.json();
+                const ndreData = await ndreResponse.json();
+                let nitrogenData = await nitrogenResponse.json();
+
+                // Debug logging
+                console.log('NDVI Data:', ndviData);
+                console.log('NDRE Data:', ndreData);
+                console.log('Nitrogen Data:', nitrogenData);
+
+                // Ensure data is sorted by date (newest first)
+                nitrogenData = nitrogenData.sort((a, b) => new Date(b.Date) - new Date(a.Date));
+                
+                // Draw charts
+                drawNDVIChart(ndviData, ndreData);
+                drawNitrogenChart(nitrogenData);
+                
+                document.getElementById('ndviChart').style.display = 'block';
+                document.getElementById('nitrogenChart').style.display = 'block';
+
+                // Load additional visualizations
+                //loadNitrogenVisualizations();
+                
+                // Update prediction content
+                updatePredictionContent(nitrogenData);
+                
+                // Load satellite map
+                loadSatelliteMap();
+                
+            } catch (error) {
+                console.error("Error in fetchAndDrawChart:", error);
+                const errorHTML = `<p style="color: red;">Error: ${error.message}. Retrying...</p>`;
+                
+                // Only update elements that exist
+                if (document.getElementById('ndviChartLoading')) {
+                    document.getElementById('ndviChartLoading').innerHTML = errorHTML;
+                }
+                if (document.getElementById('nitrogenChartLoading')) {
+                    document.getElementById('nitrogenChartLoading').innerHTML = errorHTML;
+                }
+                if (document.getElementById('prediction-loading')) {
+                    document.getElementById('prediction-loading').innerHTML = errorHTML;
+                }
+                if (document.getElementById('satellite-loading')) {
+                    document.getElementById('satellite-loading').innerHTML = errorHTML;
+                }
+                
+                setTimeout(fetchAndDrawChart, 5000);
+            }
+        }
+
+        function drawNDVIChart(ndviData, ndreData) {
+            const ctx = document.getElementById('ndviChart').getContext('2d');
+            
+            if (window.ndviChartInstance) {
+                window.ndviChartInstance.destroy();
+            }
+
+                // Add this date validation code - START
+            const validNDVIData = ndviData.filter(item => !isNaN(new Date(item.Date).getTime()));
+            const validNDREData = ndreData.filter(item => !isNaN(new Date(item.Date).getTime()));
+    
+                // Sort data by date after validation
+            validNDVIData.sort((a, b) => new Date(a.Date) - new Date(b.Date));
+            validNDREData.sort((a, b) => new Date(a.Date) - new Date(b.Date));
+
+            window.ndviChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: validNDVIData.map(item => item.Date),
+                    datasets: [
+                        {
+                            label: 'NDVI',
+                            data: validNDVIData.map(item => item.NDVI),
+                            borderColor: 'blue',
+                            backgroundColor: 'rgba(0, 128, 0, 0.1)',
+                            tension: 0.3,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'NDRE',
+                            data: validNDREData.map(item => item.NDRE),
+                            borderColor: 'red',
+                            backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                            tension: 0.3,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                // In your options:
+                    options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: {
+                        display: true,
+                        text: 'NDVI vs NDRE Over Time',
+                        font: { size: 16 }
+                        },
+                        tooltip: {
+                            enabled: true,
+                            mode: 'nearest',
+                            intersect: true,
+                            callbacks: {
+                                label: function (context) {
+                                const label = context.dataset.label || '';
+                                const value = context.raw != null ? Number(context.raw).toFixed(3) : '--';
+                                return `${label}: ${value}`;
+                                }
+                            }
+                        }
+                    },
+                    // Align interaction with tooltip
+                    interaction: {
+                        mode: 'nearest',
+                        intersect: true,
+                    },
+                    scales: {
+                        x: {
+                        type: 'time',
+                        time: {
+                            unit: 'month',
+                            tooltipFormat: 'yyyy-MM-dd',  // <— use date-fns tokens
+                            displayFormats: { month: 'MMM yyyy' }
+                        },
+                        title: { display: true, text: 'Date' }
+                        },
+                        y: {
+                        min: 0,
+                        max: 1,
+                        title: { display: true, text: 'Index Value' }
+                        }
+                    }
+                }
+
+            });
+
+            document.getElementById('ndviChartLoading').style.display = 'none';
+            document.getElementById('ndviChart').style.display = 'block';
+        }
+
+        function drawNitrogenChart(nitrogenData) {
+            const ctx = document.getElementById('nitrogenChart').getContext('2d');
+            
+            // Destroy previous chart if it exists
+            if (window.nitrogenChartInstance) {
+                window.nitrogenChartInstance.destroy();
+            }
+
+            // Format dates properly
+            const labels = nitrogenData.map(item => item.Date);
+            const values = nitrogenData.map(item => item.Estimated_N);
+
+            window.nitrogenChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Estimated Nitrogen',
+                        data: values,
+                        borderColor: 'rgba(128, 0, 128, 1)',
+                        backgroundColor: 'rgba(128, 0, 128, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true,
+                        pointRadius: 0,
+                        pointBackgroundColor: 'rgba(128, 0, 128, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                parser: 'yyyy-MM-dd',
+                                unit: 'month',
+                                displayFormats: {
+                                    month: 'MMM yyyy'
+                                },
+                                tooltipFormat: 'yyyy-MM-dd'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Estimated Nitrogen'
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: Math.max(...values) * 1.1
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Estimated Nitrogen Over Time',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    }
+                }
+            });
+
+            // Hide loading and show chart
+            document.getElementById('nitrogenChartLoading').style.display = 'none';
+            document.getElementById('nitrogenChart').style.display = 'block';
+        }
+
+        //function loadNitrogenVisualizations() {
+            // Load nitrogen analysis image with cache busting
+            //const img = document.getElementById('nitrogenAnalysisImg');
+            //img.onload = function() {
+                //document.getElementById('nitrogenAnalysisLoading').style.display = 'none';
+                //img.style.display = 'block';
+            //};
+            //img.src = 'http://localhost:5001/api/nitrogen/analysis?' + new Date().getTime();
+            
+            // Load nitrogen report
+            //fetch('http://localhost:5001/api/nitrogen/report')
+                //.then(response => response.text())
+                //.then(text => {
+                    //document.getElementById('nitrogenReport').textContent = text;
+                    //document.getElementById('nitrogenAnalysisLoading').style.display = 'none';
+                    //document.getElementById('nitrogenReport').style.display = 'block';
+                //});
+        //}
+
+        function updatePredictionContent(nitrogenData) {
+            const loadingEl = document.getElementById('prediction-loading');
+            const resultsEl = document.getElementById('prediction-results');
+            
+            if (!loadingEl || !resultsEl) {
+                console.error("Prediction elements not found");
+                return;
+            }
+
+            if (!nitrogenData || nitrogenData.length === 0) {
+                resultsEl.innerHTML = '<p>No prediction data available</p>';
+                loadingEl.style.display = 'none';
+                resultsEl.style.display = 'block';
+                return;
+            }
+            
+            const latestReading = nitrogenData[nitrogenData.length - 1];
+            const nitrogenLevel = latestReading.Estimated_N;
+            
+            let predictionText = '';
+            let recommendation = '';
+            
+            if (nitrogenLevel < 1.0) {
+                predictionText = 'Low Nitrogen Levels';
+                recommendation = 'Consider applying nitrogen fertilizer soon.';
+            } else if (nitrogenLevel >= 1.0 && nitrogenLevel < 2.0) {
+                predictionText = 'Moderate Nitrogen Levels';
+                recommendation = 'Nitrogen levels are adequate. Monitor weekly.';
+            } else {
+                predictionText = 'High Nitrogen Levels';
+                recommendation = 'No additional nitrogen needed. Levels are optimal.';
+            }
+            
+            resultsEl.innerHTML = `
+                <h3>Current Nitrogen: ${nitrogenLevel.toFixed(2)}</h3>
+                <p><strong>Status:</strong> ${predictionText}</p>
+                <p><strong>Recommendation:</strong> ${recommendation}</p>
+                <p><strong>Last Updated:</strong> ${latestReading.Date}</p>
+            `;
+            
+            loadingEl.style.display = 'none';
+            resultsEl.style.display = 'block';
+        }
+
+
+        // Load satellite map
+        function loadSatelliteMap() {
+            const iframe = document.getElementById('satellite-map');
+            const loadingEl = document.getElementById('satellite-loading');
+            
+            if (!iframe || !loadingEl) {
+                console.error("Satellite map elements not found");
+                return;
+            }
+
+            // Add a unique timestamp to prevent caching
+            const timestamp = new Date().getTime();
+            iframe.src = `http://localhost:5001/api/satellite/map?${timestamp}`;
+
+            iframe.onload = function() {
+                loadingEl.style.display = 'none';
+                iframe.style.display = 'block';
+            };
+            
+            iframe.onerror = function() {
+                loadingEl.innerHTML = '<p style="color: red;">Failed to load satellite map. Please check server connection.</p>';
+                console.error("Satellite map load error");
+            };
+        }
+
+        // Initialize everything when page loads
+        window.onload = function() {
+            initWeather();
+            fetchAndDrawChart();
+            
+            // Check server status periodically
+            setInterval(checkServerStatus, 30000);
+        };
+
+        // Check server status
+        async function checkServerStatus() {
+            try {
+                const response = await fetch('http://localhost:5001/api/status');
+                const status = await response.json();
+                console.log('Server status:', status);
+                
+                if (!status.ndvi_loaded || !status.ndre_loaded || !status.nitrogen_loaded) {
+                    // If data isn't loaded yet, try fetching again
+                    setTimeout(fetchAndDrawChart, 5000);
+                }
+            } catch (error) {
+                console.error('Error checking server status:', error);
+                // Show error message
+                document.getElementById('ndviChartLoading').innerHTML = 
+                    '<p style="color: red;">Connection error. Retrying...</p>';
+                setTimeout(fetchAndDrawChart, 5000);
+            }
+        }
+
+        const API_KEY = 'a57be93e6b755d4f85fe6c922f3084ab';
+        const POLYGON_ID = '6818b7dbd23361542f21605b';
+        const url = `https://api.agromonitoring.com/agro/1.0/soil?polyid=${POLYGON_ID}&appid=${API_KEY}`;
+
+        function fetchRealTimeSoilData() {
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+            if (data && typeof data === 'object') {
+                const t10 = data.t10 ? (data.t10 - 273.15).toFixed(2) : '--';
+                const t0 = data.t0 ? (data.t0 - 273.15).toFixed(2) : '--';
+                const moisture = data.moisture !== undefined ? (data.moisture * 100).toFixed(0) + '%' : '--';
+                const ph = data.ph !== undefined ? data.ph.toFixed(1) : '--';
+
+                // Update HTML elements
+                document.getElementById('soil-temp').textContent = `${t0} °C`;
+                document.getElementById('soil-temp10').textContent = `${t10} °C`;
+                document.getElementById('soil-moisture').textContent = moisture; // Already has %
+                document.getElementById('soil-ph').textContent = ph;
+            } else {
+                console.warn("No real-time soil data received.");
+            }
+            })
+            .catch(error => {
+            console.error('Error fetching soil data:', error);
+            });
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+        fetchRealTimeSoilData();
+        setInterval(fetchRealTimeSoilData, 10 * 60 * 1000); // refresh every 10 minutes
+        });
+
+    </script>
+</body>
+</html>
