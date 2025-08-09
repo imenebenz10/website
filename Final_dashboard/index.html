@@ -551,68 +551,184 @@
             document.getElementById('nitrogenChart').style.display = 'block';
         }
 
-        //function loadNitrogenVisualizations() {
-            // Load nitrogen analysis image with cache busting
-            //const img = document.getElementById('nitrogenAnalysisImg');
-            //img.onload = function() {
-                //document.getElementById('nitrogenAnalysisLoading').style.display = 'none';
-                //img.style.display = 'block';
-            //};
-            //img.src = 'http://localhost:5001/api/nitrogen/analysis?' + new Date().getTime();
-            
-            // Load nitrogen report
-            //fetch('http://localhost:5001/api/nitrogen/report')
-                //.then(response => response.text())
-                //.then(text => {
-                    //document.getElementById('nitrogenReport').textContent = text;
-                    //document.getElementById('nitrogenAnalysisLoading').style.display = 'none';
-                    //document.getElementById('nitrogenReport').style.display = 'block';
-                //});
-        //}
+        // Renders a compact forecast table + suggested fertilisation date
+        function renderNitrogenForecast(forecastData, resultsEl) {
+            if (!Array.isArray(forecastData) || forecastData.length === 0) {
+                resultsEl.innerHTML += '<p style="margin-top:8px;"><em>Forecast unavailable.</em></p>';
+                return;
+            }
+
+            // Decide your agronomic threshold (tune this to your crop/soil)
+            const threshold = 1.0;
+
+            // Find first forecast date where N dips below threshold
+            let suggested = null;
+            for (const row of forecastData) {
+                if (typeof row.Estimated_N === 'number' ? row.Estimated_N < threshold : parseFloat(row.Estimated_N) < threshold) {
+                    suggested = row;
+                    break;
+                }
+            }
+
+            // Build table HTML
+            let table = `
+                <h4 style="margin:12px 0 6px;">Forecast for Next Fertilisation Cycles</h4>
+                <table class="forecast-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Est. N</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            forecastData.forEach(r => {
+                const n = Number(r.Estimated_N);
+                const status = n < threshold ? 'Below target' : 'Adequate';
+                table += `
+                    <tr>
+                        <td>${r.Date}</td>
+                        <td>${isFinite(n) ? n.toFixed(2) : '--'}</td>
+                        <td>${status}</td>
+                    </tr>
+                `;
+            });
+            table += `</tbody></table>`;
+
+            // Suggestion line
+            let suggestionHTML = '';
+            if (suggested) {
+                suggestionHTML = `
+                    <div class="suggestion">
+                        Suggested next fertilisation: <strong>${suggested.Date}</strong>
+                        (forecast ${Number(suggested.Estimated_N).toFixed(2)} < ${threshold})
+                    </div>
+                `;
+            } else {
+                suggestionHTML = `
+                    <div class="suggestion">
+                        No drop below the ${threshold} threshold in the next cycles. Continue monitoring.
+                    </div>
+                `;
+            }
+
+            resultsEl.innerHTML += (table + suggestionHTML);
+        }
+
+
 
         function updatePredictionContent(nitrogenData) {
             const loadingEl = document.getElementById('prediction-loading');
             const resultsEl = document.getElementById('prediction-results');
-            
+
             if (!loadingEl || !resultsEl) {
                 console.error("Prediction elements not found");
                 return;
             }
 
-            if (!nitrogenData || nitrogenData.length === 0) {
+            // Guard: no data
+            if (!Array.isArray(nitrogenData) || nitrogenData.length === 0) {
                 resultsEl.innerHTML = '<p>No prediction data available</p>';
                 loadingEl.style.display = 'none';
                 resultsEl.style.display = 'block';
                 return;
             }
-            
-            const latestReading = nitrogenData[nitrogenData.length - 1];
-            const nitrogenLevel = latestReading.Estimated_N;
-            
-            let predictionText = '';
-            let recommendation = '';
-            
-            if (nitrogenLevel < 1.0) {
-                predictionText = 'Low Nitrogen Levels';
-                recommendation = 'Consider applying nitrogen fertilizer soon.';
-            } else if (nitrogenLevel >= 1.0 && nitrogenLevel < 2.0) {
-                predictionText = 'Moderate Nitrogen Levels';
-                recommendation = 'Nitrogen levels are adequate. Monitor weekly.';
-            } else {
-                predictionText = 'High Nitrogen Levels';
-                recommendation = 'No additional nitrogen needed. Levels are optimal.';
+
+            // IMPORTANT: fetchAndDrawChart() sorts nitrogenData as NEWEST → OLDEST
+            const latestReading = nitrogenData[0]; // newest row
+            const nitrogenLevel = Number(latestReading.Estimated_N);
+            const latestDate = latestReading.Date;
+
+            let status = 'Unknown';
+            let recommendation = 'Monitor conditions closely.';
+            if (isFinite(nitrogenLevel)) {
+                if (nitrogenLevel < 1.0) {
+                    status = 'Low Nitrogen Levels';
+                    recommendation = 'Apply nitrogen fertilizer in the next window.';
+                } else if (nitrogenLevel < 2.0) {
+                    status = 'Moderate Nitrogen Levels';
+                    recommendation = 'Levels are adequate. Monitor weekly.';
+                } else {
+                    status = 'High Nitrogen Levels';
+                    recommendation = 'No additional nitrogen needed at this time.';
+                }
             }
-            
+
+            // Base panel content
             resultsEl.innerHTML = `
-                <h3>Current Nitrogen: ${nitrogenLevel.toFixed(2)}</h3>
-                <p><strong>Status:</strong> ${predictionText}</p>
+                <h3>Current Nitrogen: ${isFinite(nitrogenLevel) ? nitrogenLevel.toFixed(2) : '--'}</h3>
+                <p><strong>Status:</strong> ${status}</p>
                 <p><strong>Recommendation:</strong> ${recommendation}</p>
-                <p><strong>Last Updated:</strong> ${latestReading.Date}</p>
+                <p><strong>Last Updated:</strong> ${latestDate || '--'}</p>
             `;
-            
-            loadingEl.style.display = 'none';
-            resultsEl.style.display = 'block';
+
+            // Append SARIMA forecast beneath the current status
+            fetch('http://localhost:5001/api/nitrogen/forecast')
+                .then(res => res.json())
+                .then(forecastData => {
+                    if (!Array.isArray(forecastData) || forecastData.length === 0) {
+                        resultsEl.innerHTML += '<p style="margin-top:8px;"><em>Forecast unavailable.</em></p>';
+                        return;
+                    }
+
+                    // Threshold for agronomic decision (tune as needed)
+                    const threshold = 1.0;
+
+                    // Find first date where forecast drops below threshold
+                    let suggested = null;
+                    for (const r of forecastData) {
+                        const val = Number(r.Estimated_N);
+                        if (isFinite(val) && val < threshold) {
+                            suggested = r;
+                            break;
+                        }
+                    }
+
+                    // Build compact table
+                    let table = `
+                        <h4 style="margin:12px 0 6px;">Forecast for Next Fertilisation Cycles</h4>
+                        <table class="forecast-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Est. N</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    forecastData.forEach(r => {
+                        const val = Number(r.Estimated_N);
+                        const status = isFinite(val) && val < threshold ? 'Below target' : 'Adequate';
+                        table += `
+                            <tr>
+                                <td>${r.Date || '--'}</td>
+                                <td>${isFinite(val) ? val.toFixed(2) : '--'}</td>
+                                <td>${status}</td>
+                            </tr>
+                        `;
+                    });
+                    table += `</tbody></table>`;
+
+                    // Suggestion line
+                    const suggestion = suggested
+                        ? `<div class="suggestion">Suggested next fertilisation: <strong>${suggested.Date}</strong> (forecast ${Number(suggested.Estimated_N).toFixed(2)} &lt; ${threshold})</div>`
+                        : `<div class="suggestion">No drop below the ${threshold} threshold in the next cycles. Continue monitoring.</div>`;
+
+                    resultsEl.innerHTML += table + suggestion;
+                })
+                .catch(err => {
+                    console.error("Forecast fetch error:", err);
+                    resultsEl.innerHTML += '<p style="margin-top:8px;color:#ffd;">Forecast unavailable.</p>';
+                })
+                .finally(() => {
+                    // Reveal panel
+                    loadingEl.style.display = 'none';
+                    resultsEl.style.display = 'block';
+                });
         }
+
 
 
         // Load satellite map

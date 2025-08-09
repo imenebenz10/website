@@ -11,6 +11,22 @@ from datetime import datetime
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from datetime import timedelta
+from flask import jsonify
+from statistics import median
+from statsmodels.tsa.statespace.sarimax import SARIMAX
+
+# Optional auto-ARIMA if available
+try:
+    from pmdarima import auto_arima
+    _HAS_PM = True
+except Exception:
+    _HAS_PM = False
+
+NITROGEN_CACHE = None  # will hold a pandas.DataFrame with Date + Estimated_N
+
 
 static_dir = os.path.join(os.path.dirname(__file__), 'static')
 if not os.path.exists(static_dir):
@@ -270,6 +286,65 @@ Data Quality Indicators:
     except Exception as e:
         print(f"Error generating nitrogen report: {str(e)}")
 
+def _infer_step_and_seasonality(dates: pd.Series):
+    """Infer the most common sampling step (Timedelta) and a seasonal period in steps."""
+    dates = pd.to_datetime(dates).sort_values()
+    if len(dates) < 3:
+        # fallback: 30-day cadence, seasonal period ~ 3 cycles
+        return timedelta(days=30), 3
+
+    deltas = np.diff(dates.values)  # numpy timedeltas
+    # median step as base cadence
+    step = pd.to_timedelta(median(pd.to_timedelta(deltas))).to_pytimedelta()
+
+    # Assume a fertilisation season ~ 30–45 days; pick closest multiple of the step
+    target_days = 35  # tune if your cycles are known (e.g., 30 or 45)
+    steps_per_season = max(2, round(target_days / max(step.days, 1)))
+    return step, int(steps_per_season)
+
+def get_nitrogen_df():
+    """
+    Returns a DataFrame with columns: ['Date','Estimated_N'].
+    Tries cache, then your loader, then CSVs.
+    Raises ValueError if not found.
+    """
+    global NITROGEN_CACHE
+
+    # 1) In-memory cache
+    if isinstance(NITROGEN_CACHE, pd.DataFrame) and not NITROGEN_CACHE.empty:
+        return NITROGEN_CACHE.copy()
+
+    # 2) 
+    try:
+        records = load_nitrogen_records()  # your existing function that returns list[dict]
+        df = pd.DataFrame(records)
+        if {'Date','Estimated_N'}.issubset(df.columns):
+            df['Date'] = pd.to_datetime(df['Date'])
+            df = df.sort_values('Date')
+            NITROGEN_CACHE = df.copy()
+            return df
+    except Exception:
+        pass
+
+    # 3) CSV fallbacks (relative and project root)
+    here = os.path.dirname(os.path.abspath(__file__))
+    candidates = [
+        os.path.join(here, 'data', 'nitrogen_data.csv'),
+        os.path.join(here, 'nitrogen_data.csv'),
+        'nitrogen_data.csv',  # final fallback: cwd
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            df = pd.read_csv(path)
+            if {'Date','Estimated_N'}.issubset(df.columns) and not df.empty:
+                df['Date'] = pd.to_datetime(df['Date'])
+                df = df.sort_values('Date')
+                NITROGEN_CACHE = df.copy()
+                return df
+
+    raise ValueError("Nitrogen data not available from cache or CSV")
+
+
 def create_satellite_map():
     try:
         # Get the latest Sentinel-2 image
@@ -413,6 +488,20 @@ def get_nitrogen_report():
         return send_file('static/nitrogen_estimation_report.txt', mimetype='text/plain')
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/api/nitrogen/forecast')
+def nitrogen_forecast():
+    """
+    Demo forecast endpoint — returns hard-coded data.
+    """
+    # Just set any values you want for demo
+    forecast = [
+        {"Date": "2025-09-15", "Estimated_N": 1.85},
+        {"Date": "2025-10-15", "Estimated_N": 1.42},
+        {"Date": "2025-11-15", "Estimated_N": 0.92}
+    ]
+    return jsonify(forecast)
+
 
 @app.route('/api/status')
 def get_status():
