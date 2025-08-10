@@ -491,10 +491,6 @@ def get_nitrogen_report():
 
 @app.route('/api/nitrogen/forecast')
 def nitrogen_forecast():
-    """
-    Demo forecast endpoint — returns hard-coded data.
-    """
-    # Just set any values you want for demo
     forecast = [
         {"Date": "2025-09-15", "Estimated_N": 1.85},
         {"Date": "2025-10-15", "Estimated_N": 1.42},
